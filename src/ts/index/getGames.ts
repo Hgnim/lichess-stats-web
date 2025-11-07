@@ -38,14 +38,22 @@ export interface RawGame {
 /**流式拉取指定用户和类型的游戏对局*/
 export async function* streamUserGames(
     username: string,
-    perf: 'bullet' | 'blitz' | 'rapid' | 'classical',
-    max = 100_000
+    perf:
+        'bullet' |
+        'blitz' |
+        'rapid' |
+        'classical' |
+        'correspondence' |
+        'chess960'
+    ,
+    since:number|null =null,
+    max:number|null = null
 ): AsyncGenerator<RawGame, void, unknown> {
     const { data } = await axios.get<NodeJS.ReadableStream>
     (
     `https://lichess.org/api/games/user/${username}`,
         {
-            params: { rated: true, perfType: perf, max, moves: false },
+            params: { rated: true, moves: false, perfType: perf, since: since, max: max },
             responseType: 'stream',
             headers: { Accept: 'application/x-ndjson' },
         }
@@ -149,7 +157,7 @@ export function gamesToKLines(games: RawGame[], username: string): KLine[] {
                 high: Math.max(...dayData.ratings),
                 low: Math.min(...dayData.ratings),
 
-                gameCount: dayData.ratings.length,
+                gameCount: dayData.ratings.length-1/*需要-1，因为之前在开头添加了初始rating，所以比实际对局多1个数据。*/,
                 winLoseDrawCount:{
                     winCount:dayData.result.victory,
                     loseCount:dayData.result.defeat,

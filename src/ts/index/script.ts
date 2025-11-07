@@ -1,6 +1,7 @@
 import * as echarts from 'echarts';
 import {EChartsType} from "echarts";
 import {gamesToKLines, KLine, streamUserGames} from './getGames';
+import {getCookie, setCookie} from "@/ts/global/cookie";
 
 let USER:string|null;//用户名
 let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
@@ -23,19 +24,44 @@ let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
             return;
         }
 
+        //cookie缓存，曾经拉取过将会缓存
+        const cookieTemp:KLine[]|null = (():KLine[]|null=>{
+            const jsonStr:string|null=localStorage.getItem(`${USER}/${PERF}`); //getCookie(`${USER}/${PERF}`);
+            if(jsonStr)
+                return JSON.parse(jsonStr) as KLine[];
+            else
+                return null;
+        })();
+
         console.log(`正在拉取用户${USER}的${PERF}类型的对局...`);
         const games: any[] = [];
-        for await (const g of streamUserGames(USER, PERF)) {
-            games.push(g);
+        {
+            let since:number|null=null;
+            if (cookieTemp){
+                let date= new Date(cookieTemp[cookieTemp.length-1].time*1000);
+                date.setDate(date.getDate() + 1);
+                since=date.getTime();
+                console.log(`cookie缓存的最后时间戳/明天的时间戳: ${cookieTemp[cookieTemp.length-1].time*1000}/${since}`);
+            }
+
+            for await (const g of streamUserGames(USER, PERF, since)) {
+                games.push(g);
+            }
         }
-        console.log(`共获取${games.length}个对局`);
+        console.log(`共拉取了${games.length}个对局`);
 
         //转换为k线数据
-        const klines:KLine[] = gamesToKLines(games, USER);
+        let klines:KLine[] = gamesToKLines(games, USER);
+        let haveNewKl:boolean=true;//判断当前是否有新的数据被拉取
         console.log(`生成了${klines.length}根K线`);
         if (klines.length === 0) {
-            console.error('K线数据为空');
-            return;
+            haveNewKl=false;
+            console.warn('拉取并生成的K线数据长度为0');
+            if (cookieTemp==null) return;
+        }
+        if (cookieTemp){
+            klines=[...cookieTemp, ...klines];
+            console.info('k线缓存已与新数据合并');
         }
 
         //转换为ECharts的格式
@@ -139,13 +165,13 @@ let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
                     const date = new Date(data[0]).toLocaleDateString('zh-CN');
 
                     return `
-                            <div style="font-size:12px; line-height:1.4;">
-                              <div style="margin-bottom:4px; color:#389bff;"><strong>${date}</strong></div>
+                            <div class="tooltip">
+                              <div class="date"><strong>${date}</strong></div>
                               <div>开始等级分: <strong>${data[1]}</strong></div>
                               <div>收尾等级分: <strong>${data[2]}</strong></div>
                               <div>最高等级分: <strong>${data[4]}</strong></div>
                               <div>最低等级分: <strong>${data[3]}</strong></div>
-                              <hr style="margin:6px 0; border-color:#555;">
+                              <hr class="line">
                               <div>当日对局: <strong>${data[5]}</strong>局</div>
                               <div>胜/负/和: <strong>${data[6]}</strong>/<strong>${data[7]}</strong>/<strong>${data[8]}</strong></div>
                             </div>
@@ -158,8 +184,13 @@ let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
         window.addEventListener('resize', () => {
             chart.resize();//随窗口变化自动调整大小
         });
-
         console.log('图表渲染完成！');
+
+        if (haveNewKl) {
+            //setCookie(`${USER}/${PERF}`,JSON.stringify(klines),3650);
+            localStorage.setItem(`${USER}/${PERF}`, JSON.stringify(klines));
+            console.log(`检测到新数据。用户：${USER}；类型：${PERF}，k线缓存已保存。`);
+        }
     } catch (error) {
         console.error('发生错误:', error);
     }
