@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "ES6",         // 目标 JavaScript 版本
+    "target": "ES6",         // 模块系统
+    "strict": true ,        // 启用严格模式
+    "moduleResolution": "node",   // 模块解析方式
+    "esModuleInterop": true,      // 允许从 ES 模块中导入 CommonJS 模块
+    "baseUrl": ".",
+    "outDir": "dist/tstojs",  //ts编译为js的文件输出位置
+    "allowJs": true,
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "global.d.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
