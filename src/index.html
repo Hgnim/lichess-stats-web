@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedReference -->
 <html lang="">
 <head>
     <meta charset="utf-8">
@@ -7,6 +8,24 @@
     <meta name="author" content="Hgnim">
 </head>
 <body>
+<div id="panel">
+    <div class="panel-sub">
+        <label for="user-input">User: </label>
+        <input type="text" id="user-input">
+        <br>
+        <label for="perf-select">Variant: </label>
+        <select id="perf-select">
+            <option value="bullet" data-i18n="index.home.resource_mode.source">bullet</option>
+            <option value="blitz" data-i18n="index.home.resource_mode.source">blitz</option>
+            <option value="rapid" data-i18n="index.home.resource_mode.source">rapid</option>
+            <option value="classical" data-i18n="index.home.resource_mode.source">classical</option>
+            <option value="correspondence" data-i18n="index.home.resource_mode.source">correspondence</option>
+            <option value="chess960" data-i18n="index.home.resource_mode.source">chess960</option>
+        </select>
+        <br>
+        <input type="button" id="submit-btn" onclick="submitButton_Click()" value="Submit">
+    </div>
+</div>
 <div id="chart"></div>
 </body>
 </html>

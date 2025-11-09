@@ -4,6 +4,41 @@ body {
   background: #111;
 }
 
+@mixin color{
+  color: white;
+}
+@mixin color-bkgcolor{
+  @include color;
+  background-color: black;
+}
+label{
+  @include color;
+}
+input{
+  @include color-bkgcolor;
+}
+select{
+  @include color-bkgcolor;
+}
+
+#panel{
+  position: absolute;
+  width: 100%;
+  height: 20%;
+  top: 0;
+}
+#panel .panel-sub{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#panel .panel-sub #submit-btn{
+  left: 50%;
+  position: relative;
+  transform: translateX(-50%);
+}
+
 #chart {
   position: absolute;
   width: 100%;

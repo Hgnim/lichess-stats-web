@@ -3,16 +3,13 @@ import {EChartsType} from "echarts";
 import {gamesToKLines, KLine, streamUserGames} from './getGames';
 import {getCookie, setCookie} from "@/ts/global/cookie";
 
-let USER:string|null;//用户名
-let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
-
-{
-    const urlParams = new URLSearchParams(window.location.search);
-    USER=urlParams.get("user");
-    PERF=urlParams.get("perf") as Parameters<typeof streamUserGames>[1];
-}
-
 (async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    await doWork(urlParams.get("user"),urlParams.get("perf") as Parameters<typeof streamUserGames>[1])
+})();
+
+/**开始生成*/
+async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parameters<typeof streamUserGames>[1]|null){
     try {
         if(!USER || !PERF) {
             console.log('user或perf参数错误或不存在。');
@@ -194,4 +191,13 @@ let PERF: Parameters<typeof streamUserGames>[1]|null;//棋局类型
     } catch (error) {
         console.error('发生错误:', error);
     }
-})();
+}
+
+export function submitButton_Click(){
+    const ui:HTMLInputElement|null=document.getElementById('user-input') as HTMLInputElement;
+    const ps:HTMLInputElement|null=document.getElementById('perf-select') as HTMLInputElement;
+    if (ui && ps){
+        doWork(ui.value,ps.value as Parameters<typeof streamUserGames>[1]);
+    }
+}
+(window as any).submitButton_Click=submitButton_Click;
