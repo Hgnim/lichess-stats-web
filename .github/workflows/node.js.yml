@@ -1,0 +1,58 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - '.gitignore'
+      - 'global.d.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'postcss.config.js'
+      - 'tsconfig.json'
+      - 'webpack.config.js'
+      - 'CNAME'
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+          persist-credentials: false
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - name: Build
+      run: npm run build
+#    - name: Copy some files to the dist folder
+#      run: |
+#        cp CNAME dist/
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        publish_branch: gh-pages
+        full_commit_message: '${{ github.event.head_commit.message }} (Deployed via GitHub Actions)'
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
