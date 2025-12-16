@@ -1,23 +1,53 @@
 import * as echarts from 'echarts';
 import {EChartsType} from "echarts";
 import {gamesToKLines, KLine, streamUserGames} from './getGames';
-import {getCookie, setCookie} from "@/ts/global/cookie";
+//import {getCookie, setCookie} from "@/ts/global/cookie";
+
+function createChartContainer(title:string,contId:string){
+    const newChart=document.createElement('div');
+    newChart.classList.value='chart';
+    {
+        const newTitle=document.createElement('span');
+        newTitle.classList.value='title';
+        newTitle.innerText=title;
+        newChart.appendChild(newTitle);
+    }
+    {
+        const newCont=document.createElement('div');
+        newCont.classList.value='chart-container';
+        newCont.id = contId;
+        newChart.appendChild(newCont);
+    }
+    document.body.appendChild(newChart);
+}
+function removeAllChartContainer(){
+    document.querySelectorAll('.chart').forEach(el => el.remove());
+}
 
 (async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    await doWork(urlParams.get("user"),urlParams.get("perf") as Parameters<typeof streamUserGames>[1])
+    if (urlParams.get("perf")) {
+        createChartContainer(urlParams.get("perf")!, 'chart-init');
+        await doWork(urlParams.get("user"), urlParams.get("perf") as Parameters<typeof streamUserGames>[1], document.getElementById('chart-init')!);
+    }
 })();
 
-/**开始生成*/
-async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parameters<typeof streamUserGames>[1]|null){
+/**
+ * 开始生成
+ * @param USER 用户名
+ * @param PERF 棋局类型
+ * @param e 容器元素
+ */
+async function doWork(USER:string|null,PERF: Parameters<typeof streamUserGames>[1]|null,e:HTMLElement){
     try {
         if(!USER || !PERF) {
             console.log('user或perf参数错误或不存在。');
             return;
         }
-        const chartEl:HTMLElement|null = document.getElementById('chart');
+
+        const chartEl:HTMLElement|null = e;
         if (!chartEl) {
-            console.error('找不到chart容器');
+            console.error(`找不到${e}容器`);
             return;
         }
 
@@ -76,7 +106,7 @@ async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parame
 
         const chart:EChartsType = echarts.init(chartEl);
         const option: echarts.EChartsOption = {
-            backgroundColor: '#111',
+            backgroundColor: '#323232',
             grid: { left: '10%', right: '10%', bottom: '15%', top: '10%' },
             dataZoom: [
                 {
@@ -155,7 +185,7 @@ async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parame
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'cross' },
-                backgroundColor: 'rgba(0,0,0,0.9)',
+                backgroundColor: 'rgba(60,60,60,0.9)',
                 textStyle: { color: '#DDD' },
                 formatter: (params: any) => {
                     const data = params[0].data;
@@ -164,13 +194,13 @@ async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parame
                     return `
                             <div class="tooltip">
                               <div class="date"><strong>${date}</strong></div>
-                              <div>开始等级分: <strong>${data[1]}</strong></div>
-                              <div>收尾等级分: <strong>${data[2]}</strong></div>
-                              <div>最高等级分: <strong>${data[4]}</strong></div>
-                              <div>最低等级分: <strong>${data[3]}</strong></div>
+                              <div>Starting Level Score: <strong>${data[1]}</strong></div>
+                              <div>Finishing level score: <strong>${data[2]}</strong></div>
+                              <div>Highest Score: <strong>${data[4]}</strong></div>
+                              <div>Minimum score: <strong>${data[3]}</strong></div>
                               <hr class="line">
-                              <div>当日对局: <strong>${data[5]}</strong>局</div>
-                              <div>胜/负/和: <strong>${data[6]}</strong>/<strong>${data[7]}</strong>/<strong>${data[8]}</strong></div>
+                              <div>Matches of the day: <strong>${data[5]}</strong> rounds</div>
+                              <div>Win/Loss/Draw: <strong>${data[6]}</strong>/<strong>${data[7]}</strong>/<strong>${data[8]}</strong></div>
                             </div>
                            `;
                 }
@@ -193,11 +223,53 @@ async function doWork(/*用户名*/USER:string|null,/*棋局类型*/PERF: Parame
     }
 }
 
-export function submitButton_Click(){
-    const ui:HTMLInputElement|null=document.getElementById('user-input') as HTMLInputElement;
-    const ps:HTMLInputElement|null=document.getElementById('perf-select') as HTMLInputElement;
-    if (ui && ps){
-        doWork(ui.value,ps.value as Parameters<typeof streamUserGames>[1]);
-    }
+const bulletSwitch:HTMLInputElement|null=document.getElementById('bullet-switch') as HTMLInputElement|null;
+const blitzSwitch:HTMLInputElement|null=document.getElementById('blitz-switch') as HTMLInputElement|null;
+const rapidSwitch:HTMLInputElement|null=document.getElementById('rapid-switch') as HTMLInputElement|null;
+const classicalSwitch:HTMLInputElement|null=document.getElementById('classical-switch') as HTMLInputElement|null;
+const correspondenceSwitch:HTMLInputElement|null=document.getElementById('correspondence-switch') as HTMLInputElement|null;
+const chess960Switch:HTMLInputElement|null=document.getElementById('chess960-switch') as HTMLInputElement|null;
+function typeSwitch_allChange(swtch:boolean){
+    if (bulletSwitch) bulletSwitch.checked=swtch;
+    if (blitzSwitch) blitzSwitch.checked=swtch;
+    if (rapidSwitch) rapidSwitch.checked=swtch;
+    if (classicalSwitch) classicalSwitch.checked=swtch;
+    if (correspondenceSwitch) correspondenceSwitch.checked=swtch;
+    if (chess960Switch) chess960Switch.checked=swtch;
 }
-(window as any).submitButton_Click=submitButton_Click;
+export function typeSwitchOaBtn_click(){
+    typeSwitch_allChange(true);
+}(window as any).typeSwitchOaBtn_click=typeSwitchOaBtn_click;
+export function typeSwitchCaBtn_click(){
+    typeSwitch_allChange(false);
+}(window as any).typeSwitchCaBtn_click=typeSwitchCaBtn_click;
+
+
+const makeBtn:HTMLButtonElement|null=document.getElementById('make-btn') as HTMLButtonElement|null;
+const usernameInput:HTMLInputElement|null=document.getElementById('username-input') as HTMLInputElement|null;
+const statusText:HTMLElement|null=document.getElementById('status-text');
+export function makeBtn_click(){
+    (async () => {
+    if (makeBtn && usernameInput && statusText &&
+        bulletSwitch && blitzSwitch && rapidSwitch &&
+        classicalSwitch && correspondenceSwitch && chess960Switch
+    ){
+        makeBtn.disabled=true;
+        statusText.innerText='working...';
+        removeAllChartContainer();
+        async function action(tile:string,perf: Parameters<typeof streamUserGames>[1]|null){
+            const id=`chart-${tile}`;
+            createChartContainer(tile,id);
+            await doWork(usernameInput?.value as string|null,perf,document.getElementById(id)!);
+        }
+        if (bulletSwitch.checked) await action('bullet','bullet');
+        if (blitzSwitch.checked) await action('blitz','blitz');
+        if (rapidSwitch.checked) await action('rapid','rapid');
+        if (classicalSwitch.checked) await action('classical','classical');
+        if (correspondenceSwitch.checked) await action('correspondence','correspondence');
+        if (chess960Switch.checked) await action('chess960','chess960');
+        statusText.innerText='done!';
+        makeBtn.disabled=false;
+    }
+    })();
+}(window as any).makeBtn_click=makeBtn_click;

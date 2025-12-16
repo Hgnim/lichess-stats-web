@@ -1,5 +1,5 @@
 <!--suppress JSUnresolvedReference -->
-<html lang="">
+<html lang="" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
@@ -8,24 +8,56 @@
     <meta name="author" content="Hgnim">
 </head>
 <body>
+<a class="github-btn" href="https://github.com/Hgnim/lichess-stats-web">
+    <img alt="github" src="https://github.githubassets.com/favicons/favicon-dark.svg">
+</a>
 <div id="panel">
-    <div class="panel-sub">
-        <label for="user-input">User: </label>
-        <input type="text" id="user-input">
-        <br>
-        <label for="perf-select">Variant: </label>
-        <select id="perf-select">
-            <option value="bullet" data-i18n="index.home.resource_mode.source">bullet</option>
-            <option value="blitz" data-i18n="index.home.resource_mode.source">blitz</option>
-            <option value="rapid" data-i18n="index.home.resource_mode.source">rapid</option>
-            <option value="classical" data-i18n="index.home.resource_mode.source">classical</option>
-            <option value="correspondence" data-i18n="index.home.resource_mode.source">correspondence</option>
-            <option value="chess960" data-i18n="index.home.resource_mode.source">chess960</option>
-        </select>
-        <br>
-        <input type="button" id="submit-btn" onclick="submitButton_Click()" value="Submit">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 col0">
+                <div class="con">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="bullet-switch" checked>
+                        <label class="form-check-label" for="bullet-switch">bullet</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="blitz-switch" checked>
+                        <label class="form-check-label" for="blitz-switch">blitz</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="rapid-switch" checked>
+                        <label class="form-check-label" for="rapid-switch">rapid</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="classical-switch" checked>
+                        <label class="form-check-label" for="classical-switch">classical</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="correspondence-switch" checked>
+                        <label class="form-check-label" for="correspondence-switch">correspondence</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chess960-switch" checked>
+                        <label class="form-check-label" for="chess960-switch">chess960</label>
+                    </div>
+                    <button id="type-switch-oabtn" onclick="typeSwitchOaBtn_click()" type="button" class="btn btn-secondary">Open All</button>
+                    <button id="type-switch-cabtn" onclick="typeSwitchCaBtn_click()" type="button" class="btn btn-secondary">Close All</button>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col1">
+                <div class="con">
+                    <div class="input-group flex-nowrap">
+                        <input id="username-input" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="addon-wrapping">
+                        <button id="make-btn" onclick="makeBtn_click()" type="button" class="btn btn-primary">Make</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col2">
+                <p id="status-text"></p>
+            </div>
+        </div>
     </div>
 </div>
-<div id="chart"></div>
+<!--<div id="chart"></div>-->
 </body>
 </html>
